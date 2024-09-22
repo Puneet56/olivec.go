@@ -1,11 +1,6 @@
 package main
 
-import (
-	"bytes"
-	"fmt"
-	"image/color"
-	"os"
-)
+import "olivec.go/olivecgo"
 
 const (
 	WIDTH  = 800
@@ -13,36 +8,10 @@ const (
 )
 
 func main() {
-	pixels := make([]color.RGBA, WIDTH*HEIGHT)
-	fillColor(pixels, WIDTH, HEIGHT, color.RGBA{255, 0, 0, 0})
-	writePixelsToPPM("output.ppm", pixels, WIDTH, HEIGHT)
-}
+	pixels := make([]olivecgo.Pixel, WIDTH*HEIGHT)
+	olivecgo.FillColor(pixels, WIDTH, HEIGHT, olivecgo.Pixel{255, 255, 255, 255})
+	olivecgo.FillCircle(pixels, WIDTH, HEIGHT, WIDTH/2, HEIGHT/2, 150, olivecgo.Pixel{255, 0, 0, 150})
+	olivecgo.FillRect(pixels, WIDTH, HEIGHT, WIDTH/2, HEIGHT/2, 100, 100, olivecgo.Pixel{0, 255, 0, 200})
 
-func fillColor(pixels []color.RGBA, width, height int, color color.RGBA) {
-	for i := 0; i < WIDTH*HEIGHT; i++ {
-		pixels[i] = color
-	}
-}
-
-func writePixelsToPPM(filename string, pixels []color.RGBA, width, height int) error {
-	b := bytes.Buffer{}
-
-	header := fmt.Sprintf("P6\n%d %d\n255\n", WIDTH, HEIGHT)
-	if _, err := b.Write([]byte(header)); err != nil {
-		return err
-	}
-
-	for _, p := range pixels {
-		pb := []byte{p.R, p.G, p.B}
-		if _, err := b.Write(pb); err != nil {
-			return err
-		}
-	}
-
-	if err := os.WriteFile(filename, b.Bytes(), 0644); err != nil {
-		return err
-	}
-
-	fmt.Printf("%s PPM file written successfully\n", filename)
-	return nil
+	olivecgo.WritePixelsToPPM("output.ppm", pixels, WIDTH, HEIGHT)
 }
