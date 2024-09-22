@@ -5,37 +5,20 @@ import (
 	"fmt"
 	"image/color"
 	"os"
+
+	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
 type Pixel color.RGBA
+
+func (o *Pixel) RGBA() (uint8, uint8, uint8, uint8) {
+	return o.R, o.G, o.B, o.A
+}
 
 func FillColor(pixels []Pixel, width, height int, color Pixel) {
 	for i := 0; i < width*height; i++ {
 		pixels[i] = color
 	}
-}
-
-func WritePixelsToPPM(filename string, pixels []Pixel, width, height int) error {
-	b := bytes.Buffer{}
-
-	header := fmt.Sprintf("P6\n%d %d\n255\n", width, height)
-	if _, err := b.Write([]byte(header)); err != nil {
-		return err
-	}
-
-	for _, p := range pixels {
-		pb := []byte{p.R, p.G, p.B}
-		if _, err := b.Write(pb); err != nil {
-			return err
-		}
-	}
-
-	if err := os.WriteFile(filename, b.Bytes(), 0644); err != nil {
-		return err
-	}
-
-	fmt.Printf("%s PPM file written successfully\n", filename)
-	return nil
 }
 
 func BlendColor(base, top Pixel) Pixel {
@@ -85,4 +68,50 @@ func FillCircle(pixels []Pixel, width, height, posX, posY, r int, color Pixel) {
 			}
 		}
 	}
+}
+
+// Uses raylib-go ("github.com/gen2brain/raylib-go/raylib") to open a window and fill the given pixels on window.
+// raylib-go wiil be removed once I learn how to open a window in cross platform way.
+func WritePixelsToWindow(title string, pixels []Pixel, width, height int) {
+	rl.InitWindow(int32(width), int32(height), title)
+	defer rl.CloseWindow()
+
+	rl.SetTargetFPS(60)
+
+	for !rl.WindowShouldClose() {
+		rl.BeginDrawing()
+
+		for y := 0; y < height; y++ {
+			for x := 0; x < width; x++ {
+				p := pixels[y*width+x]
+				r, g, b, a := p.RGBA()
+				rl.DrawPixel(int32(x), int32(y), color.RGBA{r, g, b, a})
+			}
+		}
+
+		rl.EndDrawing()
+	}
+}
+
+func WritePixelsToPPM(filename string, pixels []Pixel, width, height int) error {
+	b := bytes.Buffer{}
+
+	header := fmt.Sprintf("P6\n%d %d\n255\n", width, height)
+	if _, err := b.Write([]byte(header)); err != nil {
+		return err
+	}
+
+	for _, p := range pixels {
+		pb := []byte{p.R, p.G, p.B}
+		if _, err := b.Write(pb); err != nil {
+			return err
+		}
+	}
+
+	if err := os.WriteFile(filename, b.Bytes(), 0644); err != nil {
+		return err
+	}
+
+	fmt.Printf("%s PPM file written successfully\n", filename)
+	return nil
 }
