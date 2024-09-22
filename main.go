@@ -1,7 +1,7 @@
 package main
 
 import (
-	"olivec.go/olivecgo"
+	"github.com/Puneet56/olivec.go/olivecgo"
 )
 
 const (

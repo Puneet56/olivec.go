@@ -1,4 +1,4 @@
-module olivec.go
+module github.com/Puneet56/olivec.go
 
 go 1.23.1
 
