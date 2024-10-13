@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"os"
+	"strings"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
@@ -67,6 +68,37 @@ func FillCircle(pixels []Pixel, width, height, posX, posY, r int, color Pixel) {
 				pixels[y*width+x] = BlendColor(pixels[y*width+x], color)
 			}
 		}
+	}
+}
+
+var ASCII = "@#%$&*+=-:.` "
+
+func Map(value, fromMin, fromMax, toMin, toMax float64) float64 {
+	return (value-fromMin)*(toMax-toMin)/(fromMax-fromMin) + toMin
+}
+
+func WritePixelsToTerminal(title string, pixels []Pixel, width, height int) {
+	out := strings.Builder{}
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			p := pixels[y*width+x]
+			r, g, b, _ := p.RGBA()
+			gs := (r + g + b) / 3
+			i := int(Map(float64(gs), 0, 255, float64(len(ASCII)), 0))
+
+			if i >= len(ASCII) {
+				i = i - 1
+			}
+
+			out.WriteByte(ASCII[int(i)])
+		}
+		out.WriteString("\n")
+	}
+
+	fmt.Println(out.String())
+
+	if err := os.WriteFile(title, []byte(out.String()), 0644); err != nil {
+		fmt.Println(err)
 	}
 }
 
